@@ -54,11 +54,11 @@
                 textElement.textContent = textArray[currentIndex];
                 textElement.style.animation = 'none'; // 重置動畫
                 void textElement.offsetWidth; // 觸發重繪
-                textElement.style.animation = 'fadeInOut 3s ease-in-out forwards';
+                textElement.style.animation = 'fadeInOut 2s ease-in-out forwards';
 
                 // 更新索引
                 currentIndex++;
-                setTimeout(displayNextCharacter, 3000); // 3秒後切換到下一個字
+                setTimeout(displayNextCharacter, 2000); // 3秒後切換到下一個字
             } else {
                 // 當所有文字顯示完成後跳轉到指定網址
                 window.location.href = "https://biung-od.github.io/18/six.html";

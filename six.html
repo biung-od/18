@@ -15,45 +15,7 @@
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="css/styles.css" rel="stylesheet" />
         <!-- Google tag (gtag.js) -->
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f4f4f4;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
-            }
-            .input-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-            }
-            input[type="password"] {
-                padding: 10px;
-                font-size: 1rem;
-                width: 200px;
-            }
-            button {
-                padding: 10px 20px;
-                font-size: 1rem;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                cursor: pointer;
-                border-radius: 5px;
-            }
-            button:hover {
-                background-color: #45a049;
-            }
-            .error {
-                color: red;
-                margin-top: 10px;
-            }
-        </style>
+        
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-3L325WSJCP"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -114,12 +76,13 @@
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#interests">理財班講義</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#awards">持股k線圖</a></li>
                 </ul>
+                <input type="password" id="password" placeholder="輸入密碼">
+    <button onclick="validatePassword()">提交</button>
+    <p id="errorMessage" class="error"></p>
             </div>
            
         </nav>
-    <input type="password" id="password" placeholder="輸入密碼">
-    <button onclick="validatePassword()">提交</button>
-    <p id="errorMessage" class="error"></p>
+    
         <!-- Page Content-->
         <div class="container-fluid p-0">
             <!-- About-->

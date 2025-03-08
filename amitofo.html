@@ -3,51 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>請常念 南無阿彌陀佛</title>
+    <title>文字動畫</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             background-color: #f4f4f4;
-            text-align: center;
-            margin-top: 20%;
+            overflow: hidden;
         }
         .text {
-            font-size: 2em;
+            font-family: Arial, sans-serif;
+            font-size: 1em;
+            font-weight: bold;
             color: #4CAF50;
-            display: inline-block;
-            white-space: nowrap;
-            overflow: hidden;
-            border-right: 2px solid black;
-            width: 0;
-            animation: typing 5s steps(14, end), blink .5s step-end infinite;
+            opacity: 0;
+            transform: scale(0);
+            animation: fadeInOut 2s ease-in-out forwards;
         }
 
-        @keyframes typing {
-            from { width: 0; }
-            to { width: 14ch; } /* 文字總長度 */
-        }
-
-        @keyframes blink {
-            50% { border-color: transparent; }
+        @keyframes fadeInOut {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(10); /* 字變大 */
+                opacity: 1;
+            }
+            100% {
+                transform: scale(15);
+                opacity: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="text">請常念 南無阿彌陀佛</div>
+    <div class="text" id="animatedText"></div>
+
     <script>
-        // 如果需要逐字跳出的效果可以用 JavaScript：
-        const text = "請常念 南無阿彌陀佛";
-        const container = document.querySelector('.text');
-        container.textContent = "";
-        let i = 0;
-        const interval = setInterval(() => {
-            if (i < text.length) {
-                container.textContent += text[i];
-                i++;
-            } else {
-                clearInterval(interval);
-            }
-        }, 300); // 每300毫秒顯示一個字
+        const textArray = ["請", "常", "念", "南", "無", "阿", "彌", "陀", "佛"];
+        let currentIndex = 0;
+        const textElement = document.getElementById('animatedText');
+
+        function displayNextCharacter() {
+            // 設定當前字
+            textElement.textContent = textArray[currentIndex];
+            textElement.style.animation = 'none'; // 重置動畫
+            void textElement.offsetWidth; // 觸發重繪
+            textElement.style.animation = 'fadeInOut 2s ease-in-out forwards';
+
+            // 更新索引
+            currentIndex = (currentIndex + 1) % textArray.length;
+
+            // 定時切換下一個字
+            setTimeout(displayNextCharacter, 2000); // 每 2 秒切換一個字
+        }
+
+        // 啟動動畫
+        displayNextCharacter();
     </script>
 </body>
 </html>

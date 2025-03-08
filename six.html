@@ -15,6 +15,45 @@
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="css/styles.css" rel="stylesheet" />
         <!-- Google tag (gtag.js) -->
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }
+            .input-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            input[type="password"] {
+                padding: 10px;
+                font-size: 1rem;
+                width: 300px;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 1rem;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+            button:hover {
+                background-color: #45a049;
+            }
+            .error {
+                color: red;
+                margin-top: 10px;
+            }
+        </style>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-3L325WSJCP"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -22,6 +61,39 @@
   gtag('js', new Date());
 
   gtag('config', 'G-3L325WSJCP');
+</script>
+<script>
+    async function validatePassword() {
+        const passwordInput = document.getElementById('password').value;
+        const errorMessage = document.getElementById('errorMessage');
+
+        // 清除錯誤訊息
+        errorMessage.textContent = '';
+
+        try {
+            // 讀取 CSV 檔案
+            const response = await fetch('passw.csv');
+            if (!response.ok) throw new Error('無法載入 passw.csv');
+
+            const csvText = await response.text();
+            const rows = csvText.split('\n').map(row => row.split(','));
+
+            // 比對密碼
+            const match = rows.find(row => row[0].trim() === passwordInput);
+
+            if (match) {
+                // 若密碼匹配，跳轉到對應網址
+                const redirectUrl = match[1].trim();
+                window.location.href = redirectUrl;
+            } else {
+                // 若密碼不匹配，顯示錯誤訊息
+                errorMessage.textContent = '密碼錯誤，請重試！';
+            }
+        } catch (error) {
+            errorMessage.textContent = '讀取或比對時發生錯誤！';
+            console.error(error);
+        }
+    }
 </script>
 
     </head>
@@ -42,6 +114,12 @@
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#interests">理財班講義</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#awards">持股k線圖</a></li>
                 </ul>
+            </div>
+            <div class="input-container">
+                
+                <input type="password" id="password" placeholder="輸入密碼">
+                <button onclick="validatePassword()">提交</button>
+                <p id="errorMessage" class="error"></p>
             </div>
         </nav>
         <!-- Page Content-->

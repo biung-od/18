@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>請常念 南無阿彌陀佛</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin-top: 20%;
+        }
+        .text {
+            font-size: 2em;
+            color: #4CAF50;
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 2px solid black;
+            width: 0;
+            animation: typing 5s steps(14, end), blink .5s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 14ch; } /* 文字總長度 */
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+    </style>
+</head>
+<body>
+    <div class="text">請常念 南無阿彌陀佛</div>
+    <script>
+        // 如果需要逐字跳出的效果可以用 JavaScript：
+        const text = "請常念 南無阿彌陀佛";
+        const container = document.querySelector('.text');
+        container.textContent = "";
+        let i = 0;
+        const interval = setInterval(() => {
+            if (i < text.length) {
+                container.textContent += text[i];
+                i++;
+            } else {
+                clearInterval(interval);
+            }
+        }, 300); // 每300毫秒顯示一個字
+    </script>
+</body>
+</html>

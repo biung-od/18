@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文字動畫</title>
+    <title>文字動畫跳轉</title>
     <style>
         body {
             margin: 0;
@@ -34,7 +34,7 @@
                 opacity: 1;
             }
             100% {
-                transform: scale(50);
+                transform: scale(15);
                 opacity: 0;
             }
         }
@@ -49,17 +49,20 @@
         const textElement = document.getElementById('animatedText');
 
         function displayNextCharacter() {
-            // 設定當前字
-            textElement.textContent = textArray[currentIndex];
-            textElement.style.animation = 'none'; // 重置動畫
-            void textElement.offsetWidth; // 觸發重繪
-            textElement.style.animation = 'fadeInOut 2s ease-in-out forwards';
+            if (currentIndex < textArray.length) {
+                // 設定當前字
+                textElement.textContent = textArray[currentIndex];
+                textElement.style.animation = 'none'; // 重置動畫
+                void textElement.offsetWidth; // 觸發重繪
+                textElement.style.animation = 'fadeInOut 2s ease-in-out forwards';
 
-            // 更新索引
-            currentIndex = (currentIndex + 1) % textArray.length;
-
-            // 定時切換下一個字
-            setTimeout(displayNextCharacter, 2000); // 每 1 秒切換一個字
+                // 更新索引
+                currentIndex++;
+                setTimeout(displayNextCharacter, 2000); // 2秒後切換到下一個字
+            } else {
+                // 當所有文字顯示完成後跳轉到指定網址
+                window.location.href = "https://biung-od.github.io/18/index.html#education";
+            }
         }
 
         // 啟動動畫

@@ -3,16 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文字動畫跳轉</title>
+    <title>文字動畫廣告</title>
     <style>
         body {
             margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #adOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 1);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-            overflow: hidden;
+            z-index: 9999;
         }
         .text {
             font-family: Arial, sans-serif;
@@ -23,7 +32,20 @@
             transform: scale(0);
             animation: fadeInOut 2s ease-in-out forwards;
         }
-
+        #closeButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            display: none;
+        }
+        #closeButton:hover {
+            background-color: #45a049;
+        }
         @keyframes fadeInOut {
             0% {
                 transform: scale(0);
@@ -41,12 +63,16 @@
     </style>
 </head>
 <body>
-    <div class="text" id="animatedText"></div>
+    <div id="adOverlay">
+        <div class="text" id="animatedText"></div>
+        <button id="closeButton" onclick="closeAd()">關閉</button>
+    </div>
 
     <script>
         const textArray = ["請", "常", "念", "南無", "阿彌陀佛"];
         let currentIndex = 0;
         const textElement = document.getElementById('animatedText');
+        const closeButton = document.getElementById('closeButton');
 
         function displayNextCharacter() {
             if (currentIndex < textArray.length) {
@@ -58,11 +84,17 @@
 
                 // 更新索引
                 currentIndex++;
-                setTimeout(displayNextCharacter, 2000); // 3秒後切換到下一個字
+                setTimeout(displayNextCharacter, 2000); // 每個字出現時間
             } else {
-                // 當所有文字顯示完成後跳轉到指定網址
-                window.location.href = "https://biung-od.github.io/18/six.html";
+                // 動畫結束後顯示關閉按鈕
+                closeButton.style.display = 'block';
             }
+        }
+
+        function closeAd() {
+            // 隱藏廣告層
+            const adOverlay = document.getElementById('adOverlay');
+            adOverlay.style.display = 'none';
         }
 
         // 啟動動畫
@@ -70,3 +102,4 @@
     </script>
 </body>
 </html>
+

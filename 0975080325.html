@@ -6,6 +6,33 @@
         th { background-color: #4CAF50; color: white; cursor: pointer; }
         tr:nth-child(even) { background-color: #f2f2f2; }
     </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const headers = document.querySelectorAll("th");
+            headers.forEach((header, index) => {
+                header.addEventListener("click", () => {
+                    sortTable(index);
+                });
+            });
+        });
+
+        function sortTable(columnIndex) {
+            const table = document.querySelector("table");
+            const rows = Array.from(table.rows).slice(1);
+            const isAscending = table.getAttribute("data-sort-asc") === "true";
+
+            rows.sort((a, b) => {
+                const aText = a.cells[columnIndex].innerText;
+                const bText = b.cells[columnIndex].innerText;
+                return isAscending
+                    ? aText.localeCompare(bText, undefined, { numeric: true })
+                    : bText.localeCompare(aText, undefined, { numeric: true });
+            });
+
+            rows.forEach(row => table.appendChild(row));
+            table.setAttribute("data-sort-asc", !isAscending);
+        }
+    </script>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">

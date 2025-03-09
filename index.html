@@ -299,8 +299,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core theme JS-->
     <script src="js/scripts.js"></script>
-</body>
-<body>
+
     <div id="adOverlay">
         <div class="text" id="animatedText"></div>
         <button id="closeButton" onclick="closeAd()">關閉</button>
@@ -322,9 +321,9 @@
 
                 // 更新索引
                 currentIndex++;
-                setTimeout(displayNextCharacter, 2000); // 每個字出現時間
+                setTimeout(displayNextCharacter, 2000); // 每個字的顯示間隔時間
             } else {
-                // 動畫結束後顯示關閉按鈕
+                // 動畫完成後顯示「關閉」按鈕
                 closeButton.style.display = 'block';
             }
         }

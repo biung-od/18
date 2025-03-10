@@ -68,13 +68,13 @@
             }
         }
         
-        // Step 4: 啟動動畫並依次顯示正確的文字，最後跳轉到目標網址
+        // Step 4: 啟動動畫並依次顯示以「.」分隔的內容，最後跳轉到目標網址
         function startAnimation(data, url) {
-            const textArray = data.split(''); // 將文字拆分為單個字符陣列
+            const textArray = data.split('.'); // 按「.」分割文字
             let currentIndex = 0;
             const textElement = document.getElementById('animatedText');
         
-            function displayNextCharacter() {
+            function displayNextSegment() {
                 if (currentIndex < textArray.length) {
                     textElement.textContent = textArray[currentIndex];
                     textElement.style.animation = 'none'; // 重置動畫
@@ -82,19 +82,20 @@
                     textElement.style.animation = 'fadeInOut 2s ease-in-out forwards';
         
                     currentIndex++;
-                    setTimeout(displayNextCharacter, 2000); // 2 秒後顯示下一個字符
+                    setTimeout(displayNextSegment, 2000); // 2 秒後顯示下一段內容
                 } else {
                     // 當所有文字顯示完成後跳轉到第 3 欄的網址
                     window.location.href = url;
                 }
             }
         
-            displayNextCharacter(); // 開始顯示字符
+            displayNextSegment(); // 開始顯示段落
         }
         
         // 啟動處理流程
         fetchAndMatchCSV();
         </script>
+        
         
         
         

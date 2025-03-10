@@ -54,11 +54,11 @@
                 const csvText = await response.text();
                 const rows = csvText.split('\n').map(row => row.split(',')); // 將行與列分開
         
-                // Step 3: 匹配第 1 個欄位，並提取第 2 欄和第 3 欄的正確資料
+                // Step 3: 匹配第 1 欄，並提取第 3 欄 (跳轉網址) 和第 4 欄 (動畫文字)
                 const matchedRow = rows.find(row => row[0] === hashParameter); // 假設比對第 1 個欄位
                 if (matchedRow) {
-                    const targetUrl = matchedRow[1]; // 第 2 欄：跳轉網址
-                    const targetData = matchedRow[2].split('.').slice(1).join('.'); // 第 3 欄：點後的內容
+                    const targetUrl = matchedRow[2]; // 第 3 欄：跳轉網址
+                    const targetData = matchedRow[3]; // 第 4 欄：動畫文字
                     startAnimation(targetData, targetUrl);
                 } else {
                     console.error("未找到匹配的 hash 參數:", hashParameter);
@@ -84,7 +84,7 @@
                     currentIndex++;
                     setTimeout(displayNextCharacter, 2000); // 2 秒後顯示下一個字符
                 } else {
-                    // 當所有文字顯示完成後跳轉到第 2 欄的網址
+                    // 當所有文字顯示完成後跳轉到第 3 欄的網址
                     window.location.href = url;
                 }
             }
@@ -95,6 +95,7 @@
         // 啟動處理流程
         fetchAndMatchCSV();
         </script>
+        
         
         
 </body>

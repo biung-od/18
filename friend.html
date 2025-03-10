@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字動畫跳轉</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            overflow: hidden;
+        }
+        .text {
+            font-family: Arial, sans-serif;
+            font-size: 1em;
+            font-weight: bold;
+            color: #4CAF50;
+            opacity: 0;
+            transform: scale(0);
+            animation: fadeInOut 2s ease-in-out forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(10); /* 字變大 */
+                opacity: 1;
+            }
+            100% {
+                transform: scale(15);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="text" id="animatedText"></div>
+
+    <script>
+        // Step 1: 獲取網址的 hash 參數
+        const hashParameter = window.location.hash.substring(1);
+        
+        // Step 2: 加載並處理 CSV 檔案
+        async function fetchAndMatchCSV() {
+            try {
+                const response = await fetch('passw.csv');
+                const csvText = await response.text();
+                const rows = csvText.split('\n').map(row => row.split(',')); // 將行與列分開
+        
+                // Step 3: 匹配第 1 個欄位，並提取第 2 欄 (跳轉網址) 和第 3 欄 (動畫文字)
+                const matchedRow = rows.find(row => row[0] === hashParameter); // 假設比對第 1 個欄位
+                if (matchedRow) {
+                    const targetUrl = matchedRow[1]; // 第 2 欄：跳轉網址
+                    const targetData = matchedRow[2].split('.').slice(1).join('.'); // 第 3 欄：點後的內容
+                    startAnimation(targetData, targetUrl);
+                } else {
+                    console.error("未找到匹配的 hash 參數:", hashParameter);
+                }
+            } catch (error) {
+                console.error("加載或處理 CSV 文件時出錯:", error);
+            }
+        }
+        
+        // Step 4: 啟動動畫並依次顯示提取的文字，最後跳轉到目標網址
+        function startAnimation(data, url) {
+            const textArray = data.split(''); // 將文字拆分為單個字符陣列
+            let currentIndex = 0;
+            const textElement = document.getElementById('animatedText');
+        
+            function displayNextCharacter() {
+                if (currentIndex < textArray.length) {
+                    textElement.textContent = textArray[currentIndex];
+                    textElement.style.animation = 'none'; // 重置動畫
+                    void textElement.offsetWidth; // 觸發重繪
+                    textElement.style.animation = 'fadeInOut 2s ease-in-out forwards';
+        
+                    currentIndex++;
+                    setTimeout(displayNextCharacter, 2000); // 2 秒後顯示下一個字符
+                } else {
+                    // 當所有文字顯示完成後跳轉到第 2 欄的網址
+                    window.location.href = url;
+                }
+            }
+        
+            displayNextCharacter(); // 開始顯示字符
+        }
+        
+        // 啟動處理流程
+        fetchAndMatchCSV();
+        </script>
+        
+</body>
+</html>

@@ -52,14 +52,19 @@
             try {
                 const response = await fetch('passw.csv');
                 const csvText = await response.text();
-                const rows = csvText.split('\n').map(row => row.split(',')); // 將行與列分開
+                const rows = csvText
+                    .trim() // 移除行首尾多餘空白
+                    .split('\n') // 分割每一行
+                    .map(row => row.split(',').map(cell => cell.trim())); // 分割每行的欄位並移除空白
         
                 // Step 3: 匹配第 1 欄，並提取第 3 欄 (跳轉網址) 和第 4 欄 (動畫文字)
-                const matchedRow = rows.find(row => row[0] === hashParameter); // 假設比對第 1 個欄位
+                const matchedRow = rows.find(row => row[0] === hashParameter); // 比對第 1 欄
                 if (matchedRow) {
-                    const targetUrl = matchedRow[2]; // 第 3 欄：跳轉網址
-                    const targetData = matchedRow[3]; // 第 4 欄：動畫文字
-                    startAnimation(targetData, targetUrl);
+                    const targetUrl = matchedRow[2]; // 第 3 欄：最後跳轉的網址
+                    const animationData = matchedRow[3]; // 第 4 欄：動畫文字
+        
+                    console.log("處理中的行資料:", matchedRow); // Debug: 確認匹配的資料行
+                    startAnimation(animationData, targetUrl);
                 } else {
                     console.error("未找到匹配的 hash 參數:", hashParameter);
                 }
@@ -95,6 +100,7 @@
         // 啟動處理流程
         fetchAndMatchCSV();
         </script>
+        
         
         
         

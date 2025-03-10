@@ -76,15 +76,15 @@
         
             function displayNextSegment() {
                 if (currentIndex < textArray.length) {
-                    textElement.textContent = textArray[currentIndex];
+                    textElement.textContent = textArray[currentIndex]; // 顯示當前段落
                     textElement.style.animation = 'none'; // 重置動畫
                     void textElement.offsetWidth; // 觸發重繪
                     textElement.style.animation = 'fadeInOut 2s ease-in-out forwards';
         
-                    currentIndex++;
-                    setTimeout(displayNextSegment, 2000); // 2 秒後顯示下一段內容
+                    currentIndex++; // 更新索引至下一段
+                    setTimeout(displayNextSegment, 2000); // 2 秒後顯示下一段
                 } else {
-                    // 當所有文字顯示完成後跳轉到第 3 欄的網址
+                    // 當所有段落顯示完成後跳轉到第 3 欄的網址
                     window.location.href = url;
                 }
             }
@@ -95,6 +95,7 @@
         // 啟動處理流程
         fetchAndMatchCSV();
         </script>
+        
         
         
         

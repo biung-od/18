@@ -58,7 +58,7 @@
                 const matchedRow = rows.find(row => row[0] === hashParameter); // 假設比對第 1 個欄位
                 if (matchedRow) {
                     const targetUrl = matchedRow[1]; // 第 2 欄：跳轉網址
-                    const targetData = matchedRow[2].split('.').slice(1).join('.'); // 第 3 欄：點後的內容
+                    const targetData = matchedRow[2].split(',').slice(1).join(','); // 第 3 欄：點後的內容
                     startAnimation(targetData, targetUrl);
                 } else {
                     console.error("未找到匹配的 hash 參數:", hashParameter);

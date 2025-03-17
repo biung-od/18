@@ -25,37 +25,43 @@
   gtag('config', 'G-3L325WSJCP');
 </script>
 <script>
-   async function validatePassword() {
-    const passwordInput = document.getElementById('password').value.trim();
-    const errorMessage = document.getElementById('errorMessage');
-
-    // 清除錯誤訊息
-    errorMessage.textContent = '';
-
-    try {
-        // 讀取 CSV 檔案
-        const response = await fetch('passw.csv');
-        if (!response.ok) throw new Error('無法載入 passw.csv');
-
-        const csvText = await response.text();
-        const rows = csvText.split('\n').filter(row => row.trim() !== '').map(row => row.split(','));
-
-        // 比對密碼
-        const match = rows.find(row => row[0].trim() === passwordInput);
-
-        if (match) {
-            // 若密碼匹配，跳轉到對應網址
-            const redirectUrl = match[1].trim();
-            window.location.href = redirectUrl;
-        } else {
-            // 若密碼不匹配，顯示錯誤訊息
-            errorMessage.textContent = '密碼錯誤，請重試！';
+    async function checkEnter(event) {
+        if (event.key === "Enter") {
+            await validatePassword();
         }
-    } catch (error) {
-        errorMessage.textContent = '檔案載入或處理時發生錯誤！';
-        console.error(error);
     }
-}
+
+    async function validatePassword() {
+        const passwordInput = document.getElementById('password').value.trim();
+        const errorMessage = document.getElementById('errorMessage');
+
+        // 清除錯誤訊息
+        errorMessage.textContent = '';
+
+        try {
+            // 讀取 CSV 檔案
+            const response = await fetch('passw.csv');
+            if (!response.ok) throw new Error('無法載入 passw.csv');
+
+            const csvText = await response.text();
+            const rows = csvText.split('\n').filter(row => row.trim() !== '').map(row => row.split(','));
+
+            // 比對密碼
+            const match = rows.find(row => row[0].trim() === passwordInput);
+
+            if (match) {
+                // 若密碼匹配，跳轉到對應網址
+                const redirectUrl = match[1].trim();
+                window.location.href = redirectUrl;
+            } else {
+                // 若密碼不匹配，顯示錯誤訊息
+                errorMessage.textContent = '密碼錯誤，請重試！';
+            }
+        } catch (error) {
+            errorMessage.textContent = '檔案載入或處理時發生錯誤！';
+            console.error(error);
+        }
+    }
 </script>
 
     </head>
@@ -79,8 +85,7 @@
                 
             </div>
             <div class="input-container">
-                <input type="password" id="password" placeholder="輸入通關密語" onkeydown="checkEnter(event)>
-                <button onclick="validatePassword()">提交</button>
+                <input type="password" id="password" placeholder="輸入通關密語" onkeydown="checkEnter(event)">
                 <p id="errorMessage" class="error"></p>
             </div>
         </nav>

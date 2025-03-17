@@ -64,7 +64,6 @@
                 .then(data => {
                     const tableBody = document.getElementById('stock-table-body');
                     const rows = data.trim().split('\n');
-                    const headerRow = rows[0].split(','); // 假設第一行是標頭
 
                     rows.slice(1).forEach(row => {
                         const cells = row.split(',');
@@ -119,7 +118,7 @@
 
                             tableBody.appendChild(tr);
 
-                            // 點擊圖片顯示放大視窗（選用功能）
+                            // 點擊圖片顯示放大視窗
                             img.addEventListener('click', function () {
                                 const modal = document.createElement('div');
                                 modal.style.position = 'fixed';
@@ -138,22 +137,13 @@
                                 modalImg.style.maxWidth = '90%';
                                 modalImg.style.maxHeight = '90%';
 
-                                const closeModal = document.createElement('span');
-                                closeModal.textContent = '×';
-                                closeModal.style.position = 'absolute';
-                                closeModal.style.top = '20px';
-                                closeModal.style.right = '30px';
-                                closeModal.style.color = 'white';
-                                closeModal.style.fontSize = '40px';
-                                closeModal.style.cursor = 'pointer';
+                                modal.appendChild(modalImg);
+                                document.body.appendChild(modal);
 
-                                closeModal.addEventListener('click', function () {
+                                // 點擊放大圖片以關閉視窗
+                                modal.addEventListener('click', function () {
                                     modal.remove();
                                 });
-
-                                modal.appendChild(modalImg);
-                                modal.appendChild(closeModal);
-                                document.body.appendChild(modal);
                             });
                         }
                     });

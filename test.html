@@ -55,7 +55,13 @@
             .modal-nav.right {
                 right: 0;
             }
+        
+            /* 設置後面 5 個格子的寬度 */
+            td:nth-last-child(-n+5) {
+                width: 20%; /* 固定每個格子寬度為表格總寬度的 20% */
+            }
         </style>
+        
     </head>
     <body>
         <h1>AI生成股票分析資訊(謹供參考)</h1>
@@ -99,7 +105,7 @@
                             nameCell.textContent = cells[0].trim();
                             tr.appendChild(nameCell);
 
-                            // 應持有比例
+                            // 股價
                             const ratioCell = document.createElement('td');
                             ratioCell.textContent = cells[1].trim();
                             tr.appendChild(ratioCell);

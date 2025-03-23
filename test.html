@@ -1,190 +1,179 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>股票資訊</title>
         <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f4f4f4;
-                margin: 20px;
-            }
-            table {
-                font-size: 16px;
-                font-family: Arial, sans-serif;
-                width: 100%;
-                max-width: 1200px;
-                margin: 20px auto;
-                border: 1px solid black;
-                border-collapse: collapse;
-            }
-            th, td {
-                border: 1px solid black;
-                padding: 10px;
-                text-align: center;
-            }
-            th {
-                background-color: #4CAF50;
-                color: white;
-                cursor: pointer;
-            }
-            tr:nth-child(even) {
-                background-color: #f2f2f2;
-            }
-            h1 {
-                text-align: center;
-            }
-            .modal-nav {
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                width: 50px;
-                background-color: rgba(0, 0, 0, 0.5);
-                color: white;
-                font-size: 30px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                z-index: 1001;
-            }
-            .modal-nav.left {
-                left: 0;
-            }
-            .modal-nav.right {
-                right: 0;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>AI生成股票分析資訊(謹供參考)</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>股票名稱</th>
-                    <th>股價</th>
-                    <th>K線圖</th>
-                    <th>總體趨勢分析</th>
-                    <th>支撐位與阻力位</th>
-                    <th>結合技術指標</th>
-                    <th>技術型態</th>
-                    <th>投資決策建議</th>
-                </tr>
-            </thead>
-            <tbody id="stock-table-body">
-                <!-- 資料將動態插入這裡 -->
-            </tbody>
-        </table>
-
-        <script>
-            let currentImageIndex = 0;
-            const images = [];
-
-            // 讀取 CSV 文件並生成表格
-            fetch('allstock.csv')
-                .then(response => response.text())
-                .then(data => {
-                    const tableBody = document.getElementById('stock-table-body');
-                    const rows = data.trim().split('\n');
-
-                    rows.slice(1).forEach((row, index) => {
-                        const cells = row.split(',');
-
-                        if (cells.length >= 8) {
-                            const tr = document.createElement('tr');
-
-                            // 股票名稱
-                            const nameCell = document.createElement('td');
-                            nameCell.textContent = cells[0].trim();
-                            tr.appendChild(nameCell);
-
-                            // 股價
-                            const ratioCell = document.createElement('td');
-                            ratioCell.textContent = cells[1].trim();
-                            tr.appendChild(ratioCell);
-
-                            // K線圖
-                            const imgCell = document.createElement('td');
-                            const img = document.createElement('img');
-                            img.src = cells[2].trim();
-                            img.alt = 'K線圖';
-                            img.style.width = '100px';
-                            img.style.cursor = 'pointer';
-                            img.dataset.index = index; // 設置索引值
-                            imgCell.appendChild(img);
-                            tr.appendChild(imgCell);
-
-                            // 將圖片加入全局陣列
-                            images.push(img.src);
-
-                            // 其餘欄位
-                            ['3', '4', '5', '6', '7'].forEach(i => {
-                                const td = document.createElement('td');
-                                td.textContent = cells[i].trim();
-                                tr.appendChild(td);
-                            });
-
-                            tableBody.appendChild(tr);
-
-                            // 點擊圖片顯示放大視窗
-                            img.addEventListener('click', function () {
-                                currentImageIndex = parseInt(this.dataset.index, 10);
-                                showModal(currentImageIndex);
-                            });
-                        }
-                    });
-                })
-                .catch(error => console.error('Error fetching the CSV file:', error));
-
-            function showModal(index) {
-                const modal = document.createElement('div');
-                modal.style.position = 'fixed';
-                modal.style.top = 0;
-                modal.style.left = 0;
-                modal.style.width = '100%';
-                modal.style.height = '100%';
-                modal.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-                modal.style.display = 'flex';
-                modal.style.alignItems = 'center';
-                modal.style.justifyContent = 'center';
-                modal.style.zIndex = 1000;
-
-                const modalImg = document.createElement('img');
-                modalImg.src = images[index];
-                modalImg.style.maxWidth = '90%';
-                modalImg.style.maxHeight = '90%';
-                modal.appendChild(modalImg);
-
-                // 左區塊
-                const leftNav = document.createElement('div');
-                leftNav.className = 'modal-nav left';
-                leftNav.textContent = '<';
-                leftNav.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
-                    modalImg.src = images[currentImageIndex];
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #4CAF50; color: white; cursor: pointer; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const headers = document.querySelectorAll("th");
+            headers.forEach((header, index) => {
+                header.addEventListener("click", () => {
+                    sortTable(index);
                 });
-                modal.appendChild(leftNav);
+            });
+        });
 
-                // 右區塊
-                const rightNav = document.createElement('div');
-                rightNav.className = 'modal-nav right';
-                rightNav.textContent = '>';
-                rightNav.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    currentImageIndex = (currentImageIndex + 1) % images.length;
-                    modalImg.src = images[currentImageIndex];
+        function sortTable(columnIndex) {
+            const table = document.querySelector("table");
+            const rows = Array.from(table.rows).slice(1);
+            const isAscending = table.getAttribute("data-sort-asc") === "true";
+
+            rows.sort((a, b) => {
+                const aText = a.cells[columnIndex].innerText;
+                const bText = b.cells[columnIndex].innerText;
+                return isAscending
+                    ? aText.localeCompare(bText, undefined, { numeric: true })
+                    : bText.localeCompare(aText, undefined, { numeric: true });
+            });
+
+            rows.forEach(row => table.appendChild(row));
+            table.setAttribute("data-sort-asc", !isAscending);
+        }
+    </script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票資訊</title>
+    <style>
+        table {
+            font-size: 18px;
+            font-family: Arial, sans-serif;
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px auto;
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+        img {
+            width: 700px;
+            height: auto;
+            cursor: pointer; /* 當滑鼠移動到圖片上時顯示指標 */
+        }
+        h1 {
+            text-align: center;
+        }
+        /* 浮動視窗的樣式 */
+        .modal {
+            display: none; /* 預設隱藏 */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); /* 半透明黑色背景 */
+
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%; /* 限制放大圖片的最大寬度 */
+            max-height: 90%; /* 限制放大圖片的最大高度 */
+        }
+        .modal-content img {
+            width: 100%;
+            height: auto;
+        }
+        /* 關閉按鈕樣式 */
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>存股-應持有比例列表</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>股票名稱</th>
+                <th>應持有比例</th>
+                <th>k線圖</th>
+            </tr>
+        </thead>
+        <tbody id="stock-table-body">
+            <!-- 資料將動態插入這裡 -->
+        </tbody>
+    </table>
+
+    <!-- 浮動視窗 -->
+    <div id="myModal" class="modal">
+        <span class="close">&times;</span>
+        <div class="modal-content">
+            <img id="imgModal" src="" alt="放大的圖片">
+        </div>
+    </div>
+
+    <script>
+        // 讀取 CSV 文件並生成表格
+        fetch('ownstock.csv')
+            .then(response => response.text())
+            .then(data => {
+                const tableBody = document.getElementById('stock-table-body');
+                const rows = data.trim().split('\n');
+                
+                rows.forEach(row => {
+                    const cells = row.split(',');
+                    if (cells.length >= 4) {
+                        const tr = document.createElement('tr');
+                        
+                        // 股名
+                        const nameCell = document.createElement('td');
+                        nameCell.textContent = cells[0].trim();
+                        tr.appendChild(nameCell);
+                        
+                        // 應持有比例
+                        const ratioCell = document.createElement('td');
+                        ratioCell.textContent = cells[2].trim();
+                        tr.appendChild(ratioCell);
+
+                        // 圖片
+                        const imgCell = document.createElement('td');
+                        const img = document.createElement('img');
+                        img.src = cells[3].trim();
+                        img.alt = 'K線圖';
+                        imgCell.appendChild(img);
+                        tr.appendChild(imgCell);
+                        
+                        tableBody.appendChild(tr);
+
+                        // 點擊圖片顯示放大視窗
+                        img.addEventListener('click', function() {
+                            const modal = document.getElementById('myModal');
+                            const modalImg = document.getElementById('imgModal');
+                            modal.style.display = "block";
+                            modalImg.src = this.src;
+                        });
+                    }
                 });
-                modal.appendChild(rightNav);
+            })
+            .catch(error => console.error('Error fetching the CSV file:', error));
 
-                // 點擊視窗關閉
-                modal.addEventListener('click', function () {
-                    modal.remove();
-                });
-
-                document.body.appendChild(modal);
+        // 關閉浮動視窗
+        const modal = document.getElementById('myModal');
+        const span = document.getElementsByClassName('close')[0];
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
             }
-        </script>
-    </body>
+        }
+    </script>
+</body>
 </html>

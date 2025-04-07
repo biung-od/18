@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
     <head>
@@ -56,7 +57,6 @@
                 right: 0;
             }
         </style>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     </head>
     <body>
         <h1>AI生成股票分析資訊(謹供參考)</h1>
@@ -87,13 +87,11 @@
                 .then(response => response.text())
                 .then(data => {
                     const tableBody = document.getElementById('stock-table-body');
+                    const rows = data.trim().split('\n');
 
-                    // 使用 Papa Parse 解析 CSV
-                    const results = Papa.parse(data, { header: false });
-                    const rows = results.data;
+                    rows.slice(1).forEach((row, index) => {
+                        const cells = row.split(',');
 
-                    // 從第二行開始遍歷 (跳過標題行)
-                    rows.slice(1).forEach((cells, index) => {
                         if (cells.length >= 8) {
                             const tr = document.createElement('tr');
 

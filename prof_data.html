@@ -7,6 +7,50 @@
         tr:nth-child(even) { background-color: #f2f2f2; }
     </style>
     <script>
+      document.addEventListener("DOMContentLoaded", function() {
+          const headers = document.querySelectorAll("th");
+          headers.forEach((header, index) => {
+              header.addEventListener("click", () => {
+                  sortTable(index);
+              });
+          });
+  
+          // 處理 "今年績效" 欄位的字體顏色
+          const rows = document.querySelectorAll("tbody tr");
+          rows.forEach(row => {
+              const performanceCell = row.cells[6]; // 第七欄 (從 0 開始計算)
+              if (performanceCell) {
+                  const value = parseFloat(performanceCell.textContent.replace('%', '')); // 移除百分號並轉換為數字
+                  if (!isNaN(value)) {
+                      if (value > 0) {
+                          performanceCell.style.color = "red"; // 正值為紅字
+                      } else if (value < 0) {
+                          performanceCell.style.color = "blue"; // 負值為藍字
+                      }
+                  }
+              }
+          });
+      });
+  
+      function sortTable(columnIndex) {
+          const table = document.querySelector("table");
+          const rows = Array.from(table.rows).slice(1);
+          const isAscending = table.getAttribute("data-sort-asc") === "true";
+  
+          rows.sort((a, b) => {
+              const aText = a.cells[columnIndex].innerText;
+              const bText = b.cells[columnIndex].innerText;
+              return isAscending
+                  ? aText.localeCompare(bText, undefined, { numeric: true })
+                  : bText.localeCompare(aText, undefined, { numeric: true });
+          });
+  
+          rows.forEach(row => table.appendChild(row));
+          table.setAttribute("data-sort-asc", !isAscending);
+      }
+  </script>
+  
+    <script>
         document.addEventListener("DOMContentLoaded", function() {
             const headers = document.querySelectorAll("th");
             headers.forEach((header, index) => {

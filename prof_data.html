@@ -18,34 +18,35 @@
           // 處理 "今年績效" 欄位的字體顏色以及 "應持有比例" 欄位的背景顏色
           const rows = document.querySelectorAll("tbody tr");
           rows.forEach(row => {
-    // "今年績效" 字體顏色
-    const performanceCell = row.cells[6]; // 第七欄 (從 0 開始計算)
-    if (performanceCell) {
-        const value = parseFloat(performanceCell.textContent.replace('%', '')); // 移除百分號並轉換為數字
-        if (!isNaN(value)) {
-            if (value > 0) {
-                performanceCell.style.color = "red"; // 正值為紅字
-            } else if (value < 0) {
-                performanceCell.style.color = "green"; // 負值為綠字
-            }
-        }
-    }
-
-    // "應持有比例" 背景顏色
-    const holdRatioCell = row.cells[5]; // 第六欄 (從 0 開始計算)
-    if (holdRatioCell) {
-        const ratioValue = parseFloat(holdRatioCell.textContent.replace('%', '')); // 移除百分號並轉換為數字
-        if (!isNaN(ratioValue)) {
-            if (ratioValue > 2.5) {
-                holdRatioCell.style.backgroundColor = "pink"; // 大於 2.5% 用粉紅色
-            } else if (ratioValue > 1 && ratioValue <= 2) {
-                holdRatioCell.style.backgroundColor = "plum"; // 介於 1% 至 2% 用粉紫色
-            } else if (ratioValue >= 0.75 && ratioValue <= 1) { // 調整這裡的條件
-                holdRatioCell.style.backgroundColor = "lightblue"; // 大於等於 0.75% 且小於等於 1% 用粉藍色
-            }
-        }
-    }
-});
+              // "今年績效" 字體顏色
+              const performanceCell = row.cells[6]; // 第七欄 (從 0 開始計算)
+              if (performanceCell) {
+                  const value = parseFloat(performanceCell.textContent.replace('%', '')); // 移除百分號並轉換為數字
+                  if (!isNaN(value)) {
+                      if (value > 0) {
+                          performanceCell.style.color = "red"; // 正值為紅字
+                      } else if (value < 0) {
+                          performanceCell.style.color = "green"; // 負值為綠字
+                      }
+                  }
+              }
+  
+              // "應持有比例" 背景顏色
+              const holdRatioCell = row.cells[5]; // 第六欄 (從 0 開始計算)
+              if (holdRatioCell) {
+                  const ratioValue = parseFloat(holdRatioCell.textContent.replace('%', '')); // 移除百分號並轉換為數字
+                  if (!isNaN(ratioValue)) {
+                      if (ratioValue > 2.5) {
+                          holdRatioCell.style.backgroundColor = "pink"; // 大於2.5%用粉紅色
+                      } else if (ratioValue > 1 && ratioValue <= 2) {
+                          holdRatioCell.style.backgroundColor = "plum"; // 介於1%至2%用粉紫色
+                      } else if (ratioValue > 0.75) {
+                          holdRatioCell.style.backgroundColor = "lightblue"; // 大於0.75%用粉藍色
+                      }
+                  }
+              }
+          });
+      });
   
       function sortTable(columnIndex) {
           const table = document.querySelector("table");

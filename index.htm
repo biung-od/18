@@ -1,4 +1,38 @@
-<iframe src="https://mingguang.im/gongfo" width="970px" height="1600px" frameborder="0" scrolling="no">
-</iframe>
-</P>
-<a href="https://biung-od.github.io/18/0702.html">這個連結</a>會連到 本週課程資訊<br>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>置中視窗與自動跳轉</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center; /* 置中 */
+            align-items: center;    /* 置中 */
+            height: 100vh;          /* 全頁高度 */
+            background-color: #f4f4f4; /* 背景色 */
+        }
+        iframe {
+            width: 970px;
+            height: 1600px;
+            border: 0;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* 添加陰影 */
+        }
+    </style>
+</head>
+<body>
+    <!-- iframe 置於網頁正中央 -->
+    <iframe src="https://mingguang.im/gongfo" frameborder="0" scrolling="no"></iframe>
+
+    <!-- 自動跳轉功能 -->
+    <script>
+        setTimeout(function() {
+            window.location.href = "https://biung-od.github.io/18/six.html";
+        }, 10000); // 10秒後跳轉
+    </script>
+</body>
+</html>
+

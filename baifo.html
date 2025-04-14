@@ -22,10 +22,18 @@
 <body>
     <div class="content">
         <h1>歡迎來到明光</h1>
-        <p>這是一個簡單的 HTML 頁面，已去除 React 依賴，適合直接嵌入網頁使用。</p>
+        <p>這是靜態 HTML 頁面，無需使用 React，也不需要額外 JavaScript 來載入內容。</p>
     </div>
+
+    <div>
+        <video id="player" controls width="400">
+            <source src="https://example.com/sample.mp4" type="video/mp4">
+            您的瀏覽器不支援影片播放
+        </video>
+    </div>
+
     <script>
-        console.log("網頁加載完成！");
+        console.log("網頁已載入！");
     </script>
 </body>
 </html>

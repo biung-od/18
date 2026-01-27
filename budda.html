@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线供佛 - 明光 (私人修持版)</title>
+    <style>
+        /* --- 基礎設定 --- */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a1a;
+            font-family: "Microsoft YaHei", "Heiti SC", sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- 主容器 --- */
+        #app {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 100vh;
+            background: #2b0c0c;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- 背景層 (修正：確保底圖比例正確不被過度裁切) --- */
+        .bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://mingguang.im/gongfo/assets/img/bg.jpg');
+            background-size: contain; /* 確保完整顯示底圖比例 */
+            background-repeat: no-repeat;
+            background-position: center top;
+            z-index: 1;
+            filter: brightness(0.3); 
+            transition: filter 2s ease-in-out; 
+        }
+
+        /* --- 佛像層 --- */
+        .buddha-layer {
+            position: absolute;
+            top: 15%; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 55%; 
+            max-width: 450px;
+            z-index: 2;
+            text-align: center;
+        }
+
+        /* 直式螢幕優化佛像比例 */
+        @media screen and (max-aspect-ratio: 1/1) {
+            .buddha-layer {
+                width: 75%;
+                top: 18%;
+            }
+        }
+
+        .buddha-img {
+            width: 100%;
+            height: auto;
+            filter: brightness(0.6) drop-shadow(0 0 10px rgba(255,215,0,0.3));
+            transition: filter 2s ease-in-out;
+            display: block;
+        }
+
+        /* --- 開燈狀態 --- */
+        #app.light-up .bg-layer {
+            filter: brightness(1.0);
+        }
+        #app.light-up .buddha-img {
+            filter: brightness(1.0) drop-shadow(0 0 30px rgba(255,215,0,0.7));
+        }
+
+        /* --- 供品層 (配合 contain 背景進行定位) --- */
+        .offerings-layer {
+            position: absolute;
+            bottom: 25%; /* 根據視覺桌面上移 */
+            left: 0;
+            width: 100%;
+            height: 300px;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .offering {
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+            bottom: 0;
+        }
+        
+        .offering.show {
+            opacity: 1;
+        }
+
+        /* 供燈 */
+        .lamp-left { left: 2%; bottom: 550px; width: 15%; max-width: 100px; z-index: 10; }
+        .lamp-right { right: 2%; bottom: 550px; width: 15%; max-width: 100px; z-index: 10; }
+        
+        /* 水杯 */
+        .water-bowl { 
+            left: 50%; 
+            transform: translateX(-50%); 
+            bottom: 100px; 
+            width: 85%;
+            max-width: 500px;  
+            z-index: 50;   
+        }
+        
+        /* 香爐 */
+        .incense-burner { 
+            left: 50%; 
+            transform: translateX(-50%); 
+            bottom: 100px; 
+            width: 18%; 
+            max-width: 110px;
+            z-index: 55; 
+        }
+
+        /* 花瓶 (置於最前 z-index 60) */
+        .flower-vase-left { left: 2%; bottom: 100px; width: 18%; max-width: 110px; z-index: 60; }
+        .flower-vase-right { right: 2%; bottom: 100px; width: 18%; max-width: 110px; z-index: 60; }
+
+        /* 供曼札 */
+        .mandala-plate { left: 22%; bottom: 80px; width: 20%; max-width: 120px; z-index: 8; }
+
+        /* 供食子 */
+        .food-plate { right: 22%; bottom: 80px; width: 20%; max-width: 100px; z-index: 8; }
+
+        /* 手機直式螢幕微調 */
+        @media screen and (max-width: 500px) {
+            .offerings-layer { bottom: 22%; }
+            .lamp-left { bottom: 60px; }
+            .lamp-right { bottom: 60px; }
+            .water-bowl { bottom: -40px; }
+        }
+
+        /* --- 燭火動畫 --- */
+        .flame-anim {
+            width: 12px; height: 24px;
+            background: radial-gradient(circle, #fff 0%, #ffcc00 40%, #ff6600 100%);
+            border-radius: 50% 50% 20% 20%;
+            position: absolute; 
+            top: 45%; 
+            left: 50%; 
+            transform: translateX(-50%);
+            box-shadow: 0 0 15px #ff6600;
+            animation: flicker 0.1s infinite alternate;
+            display: none;
+            z-index: 11;
+        }
+        .show .flame-anim { display: block; }
+
+        @keyframes flicker { 
+            0% { transform: translateX(-50%) scale(1); opacity: 0.9; } 
+            100% { transform: translateX(-50%) scale(1.1) rotate(1deg); opacity: 1; } 
+        }
+
+        /* --- 控制面板 --- */
+        .controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px 0 25px 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.95));
+            z-index: 100;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn {
+            background: linear-gradient(to bottom, #f1c40f, #d4ac0d);
+            border: 1px solid #f7dc6f;
+            color: #5d4037;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: 0.2s;
+        }
+
+        .btn:active { transform: scale(0.95); }
+
+        .btn-reset {
+            background: #641e16;
+            color: #f1c40f;
+            border: 1px solid #f1c40f;
+        }
+
+        /* --- 提示文字 --- */
+        .message {
+            position: absolute;
+            bottom: 720px; 
+            width: 100%;
+            text-align: center;
+            color: #f1c40f;
+            font-size: 18px;
+            text-shadow: 0 2px 10px rgba(0,0,0,1);
+            z-index: 150;
+            opacity: 0;
+            transition: 0.8s;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="message" id="msg-box">供養功德殊勝行</div>
+
+    <div class="bg-layer"></div>
+
+    <div class="buddha-layer">
+         <img src="https://mingguang.im/gongfo/assets/img/foxiang/1.png" class="buddha-img" alt="佛像" onerror="this.style.display='none'">
+    </div>
+
+    <div class="offerings-layer">
+        <!-- 燈 -->
+        <div class="offering lamp-left" id="vis-lamp-l">
+            <div class="flame-anim"></div>
+            <img src="https://mingguang.im/gongfo/assets/img/gd.png" width="100%" alt="燈">
+        </div>
+        <div class="offering lamp-right" id="vis-lamp-r">
+            <div class="flame-anim"></div>
+            <img src="https://mingguang.im/gongfo/assets/img/gd.png" width="100%" alt="燈">
+        </div>
+
+        <!-- 水 -->
+        <div class="offering water-bowl" id="vis-water">
+            <img src="https://mingguang.im/gongfo/assets/img/gs.png" width="100%" alt="水">
+        </div>
+
+        <!-- 花 (z-index 60, 最前面) -->
+        <div class="offering flower-vase-left" id="vis-flower-l">
+            <img src="https://mingguang.im/gongfo/assets/img/gh.png" width="100%" alt="花">
+        </div>
+        <div class="offering flower-vase-right" id="vis-flower-r">
+            <img src="https://mingguang.im/gongfo/assets/img/gh.png" width="100%" alt="花">
+        </div>
+
+        <!-- 香 -->
+        <div class="offering incense-burner" id="vis-incense">
+            <img src="https://mingguang.im/gongfo/assets/img/gx.png" width="100%" alt="香">
+        </div>
+
+        <!-- 供曼札 -->
+        <div class="offering mandala-plate" id="vis-mandala">
+            <img src="https://mingguang.im/gongfo/assets/img/mcl.png" width="100%" alt="曼札">
+        </div>
+
+        <!-- 供食子 -->
+        <div class="offering food-plate" id="vis-food">
+            <img src="https://mingguang.im/gongfo/assets/img/gg.png" width="100%" alt="食子">
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="offer('lamp', '供燈功德：增長智慧，辨別是非')">供燈</button>
+        <button class="btn" onclick="offer('water', '供水功德：心意調柔，健康無病')">供水</button>
+        <button class="btn" onclick="offer('flower', '供花功德：容貌美麗，身體芳香')">供花</button>
+        <button class="btn" onclick="offer('incense', '供香功德：罪障消除，所求如願')">供香</button>
+        <button class="btn" onclick="offer('mandala', '供曼札功德：積集資糧，圓滿福慧')">供曼札</button>
+        <button class="btn" onclick="offer('food', '供食子功德：消除匱乏，福報圓滿')">供食子</button>
+        <button class="btn btn-reset" onclick="resetAll()">再供一次</button>
+    </div>
+</div>
+
+<script>
+    function offer(type, text) {
+        document.getElementById('app').classList.add('light-up');
+
+        if(type === 'lamp') {
+            document.getElementById('vis-lamp-l').classList.add('show');
+            document.getElementById('vis-lamp-r').classList.add('show');
+        } else if (type === 'water') {
+            document.getElementById('vis-water').classList.add('show');
+        } else if (type === 'flower') {
+            document.getElementById('vis-flower-l').classList.add('show');
+            document.getElementById('vis-flower-r').classList.add('show');
+        } else if (type === 'incense') {
+            document.getElementById('vis-incense').classList.add('show');
+        } else if (type === 'mandala') {
+            document.getElementById('vis-mandala').classList.add('show');
+        } else if (type === 'food') {
+            document.getElementById('vis-food').classList.add('show');
+        }
+
+        const msgBox = document.getElementById('msg-box');
+        msgBox.innerText = text;
+        msgBox.style.opacity = 1;
+        
+        setTimeout(() => {
+            if(msgBox.innerText === text) msgBox.style.opacity = 0;
+        }, 3500);
+    }
+
+    function resetAll() {
+        const items = document.querySelectorAll('.offering');
+        items.forEach(item => item.classList.remove('show'));
+        document.getElementById('app').classList.remove('light-up');
+
+        const msgBox = document.getElementById('msg-box');
+        msgBox.innerText = "心誠則靈，已重新整理";
+        msgBox.style.opacity = 1;
+        setTimeout(() => { msgBox.style.opacity = 0; }, 1500);
+    }
+</script>
+
+</body>
+</html>

@@ -6,7 +6,78 @@
         th { background-color: #4CAF50; color: white; cursor: pointer; }
         tr:nth-child(even) { background-color: #f2f2f2; }
     </style>
-    <table border="1" class="dataframe">
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const headers = document.querySelectorAll("th");
+        headers.forEach((header, index) => {
+            header.addEventListener("click", () => {
+                sortTable(index); // 執行排序
+                applyCellStyles(); // 在排序後重新應用樣式
+            });
+        });
+
+        applyCellStyles(); // 初始載入時應用樣式
+
+        // 修正的數值排序邏輯
+        function sortTable(columnIndex) {
+            const table = document.querySelector("table");
+            const rows = Array.from(table.rows).slice(1); // 排除表頭
+            const isAscending = table.getAttribute("data-sort-asc") === "true";
+
+            rows.sort((a, b) => {
+                // 取出儲存格的文字並轉為數值
+                const aValue = parseFloat(a.cells[columnIndex].innerText.replace('%', '').trim());
+                const bValue = parseFloat(b.cells[columnIndex].innerText.replace('%', '').trim());
+
+                // 若值為非數字，排序到最後
+                if (isNaN(aValue)) return 1;
+                if (isNaN(bValue)) return -1;
+
+                // 根據升序或降序進行排序
+                return isAscending ? aValue - bValue : bValue - aValue;
+            });
+
+            rows.forEach(row => table.appendChild(row)); // 更新排序後的表格
+            table.setAttribute("data-sort-asc", !isAscending); // 切換升序或降序
+        }
+
+        function applyCellStyles() {
+            const rows = document.querySelectorAll("tbody tr");
+            rows.forEach(row => {
+                // "今年績效" 字體顏色
+                const performanceCell = row.cells[6];
+                if (performanceCell) {
+                    const value = parseFloat(performanceCell.textContent.replace('%', ''));
+                    if (!isNaN(value)) {
+                        if (value > 0) {
+                            performanceCell.style.color = "red"; // 正值顯示紅字
+                        } else if (value < 0) {
+                            performanceCell.style.color = "green"; // 負值顯示綠字
+                        }
+                    }
+                }
+
+                // "應持有比例" 背景顏色
+                const holdRatioCell = row.cells[5];
+                if (holdRatioCell) {
+                    const ratioValue = parseFloat(holdRatioCell.textContent.replace('%', ''));
+                    if (!isNaN(ratioValue)) {
+                        if (ratioValue >= 2.5) { // 修正條件：包含等於 2.5%
+                            holdRatioCell.style.backgroundColor = "pink"; // 大於或等於2.5%用粉紅色
+                                } else if (ratioValue > 1 && ratioValue <= 2) {
+                                holdRatioCell.style.backgroundColor = "plum"; // 介於1%至2%用粉紫色
+                                } else if (ratioValue >= 0.75) {
+                                holdRatioCell.style.backgroundColor = "lightblue"; // 大於0.75%
+                                }
+
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>股名</th>
@@ -412,7 +483,7 @@
     </tr>
     <tr>
       <td>皇家可口</td>
-      <td>69.80</td>
+      <td>-</td>
     </tr>
     <tr>
       <td>中保科</td>
@@ -420,7 +491,7 @@
     </tr>
     <tr>
       <td>大東電</td>
-      <td>215.50</td>
+      <td>-</td>
     </tr>
     <tr>
       <td>三商餐飲</td>
@@ -428,7 +499,7 @@
     </tr>
     <tr>
       <td>台灣積層</td>
-      <td>38.00</td>
+      <td>-</td>
     </tr>
     <tr>
       <td>青新-創</td>
@@ -436,7 +507,7 @@
     </tr>
     <tr>
       <td>悠遊卡</td>
-      <td>54.40</td>
+      <td>-</td>
     </tr>
     <tr>
       <td>南光</td>

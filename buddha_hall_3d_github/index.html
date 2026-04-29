@@ -502,23 +502,51 @@
       color: #fff5d6;
     }
 
-    #mobilePad {
+    #mobileMoveTab {
       position: fixed;
-      z-index: 11;
-      left: 16px;
-      bottom: 92px;
+      z-index: 13;
+      left: 14px;
+      bottom: 82px;
       display: none;
-      grid-template-columns: repeat(3, 46px);
-      grid-template-rows: repeat(3, 46px);
-      gap: 6px;
-      padding: 8px;
-      border-radius: 16px;
-      background: rgba(10, 5, 2, 0.45);
-      border: 1px solid rgba(255, 226, 155, 0.25);
-      backdrop-filter: blur(8px);
+      width: 52px;
+      height: 52px;
+      padding: 0;
+      border: 1px solid rgba(255, 230, 164, 0.54);
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffe8a5, #d99d35);
+      color: #2b1504;
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
     }
 
-    #mobilePad button {
+    #mobileControlsPanel {
+      position: fixed;
+      z-index: 11;
+      left: 12px;
+      bottom: 140px;
+      display: none;
+      grid-template-columns: repeat(3, 48px);
+      grid-template-rows: repeat(3, 48px);
+      gap: 6px;
+      width: 172px;
+      max-width: 172px;
+      padding: 10px;
+      border-radius: 18px;
+      background: rgba(35, 15, 5, 0.72);
+      border: 1px solid rgba(255, 226, 155, 0.35);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.26);
+    }
+
+    #mobileControlsPanel.mobile-controls-open {
+      display: grid;
+    }
+
+    #mobileControlsPanel button {
+      width: 48px;
+      height: 48px;
+      padding: 0;
       border: 1px solid rgba(255, 230, 164, 0.35);
       border-radius: 12px;
       background: rgba(216, 160, 54, 0.78);
@@ -527,9 +555,14 @@
       font-size: 18px;
     }
 
-    #mobilePad .blank {
+    #mobileControlsPanel .blank {
       opacity: 0;
       pointer-events: none;
+    }
+
+    #mobileControlClose {
+      background: rgba(255, 238, 190, 0.86) !important;
+      font-size: 16px !important;
     }
 
     #fileProtocolNotice {
@@ -616,8 +649,14 @@
         bottom: 132px;
         top: auto;
       }
-      #mobilePad {
-        display: grid;
+      #mobileMoveTab {
+        display: block;
+      }
+      #mobileControlsPanel {
+        left: 12px;
+        bottom: 142px;
+        transform: scale(0.9);
+        transform-origin: left bottom;
       }
     }
   </style>
@@ -636,7 +675,7 @@
   <div id="fileProtocolNotice" role="status" aria-live="polite">
     <button type="button" aria-label="關閉提示" onclick="this.parentElement.style.display='none'">關閉</button>
     <strong>請使用本機伺服器開啟此頁，不要直接雙擊 HTML。</strong><br/>
-    請在資料夾中執行 <code>python -m http.server 8090</code>，然後打開 <code>http://localhost:8090</code>。
+    請在資料夾中執行 <code>python -m http.server 8090</code>，然後打開終端機顯示的本機網址。
   </div>
   <script>
     if (location.protocol === "file:") {
@@ -762,10 +801,11 @@
     </div>
   </div>
 
-  <div id="mobilePad">
-    <button class="blank"></button><button data-move="forward">▲</button><button class="blank"></button>
-    <button data-move="left">◀</button><button data-move="back">▼</button><button data-move="right">▶</button>
-    <button class="blank"></button><button data-move="stop">●</button><button class="blank"></button>
+  <button id="mobileMoveTab" type="button" aria-controls="mobileControlsPanel" aria-expanded="false">移動</button>
+  <div id="mobileControlsPanel" aria-label="手機方向控制">
+    <button class="blank" tabindex="-1"></button><button id="mobileForwardBtn" class="mobile-dir-btn" data-move="forward">▲</button><button id="mobileControlClose" type="button" aria-label="關閉方向控制">×</button>
+    <button id="mobileLeftBtn" class="mobile-dir-btn" data-move="left">◀</button><button id="mobileStopBtn" class="mobile-dir-btn" data-move="stop">●</button><button id="mobileRightBtn" class="mobile-dir-btn" data-move="right">▶</button>
+    <button class="blank" tabindex="-1"></button><button id="mobileBackBtn" class="mobile-dir-btn" data-move="back">▼</button><button class="blank" tabindex="-1"></button>
   </div>
 
   <div id="dedicationModal" aria-hidden="true">
@@ -784,6 +824,13 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+    const IS_MOBILE = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const LOW_PERFORMANCE_MODE = IS_MOBILE;
+    const TARGET_FPS = LOW_PERFORMANCE_MODE ? 30 : 60;
+    const RENDERER_PIXEL_RATIO_LIMIT = LOW_PERFORMANCE_MODE ? 1.0 : 1.5;
+    const SIDE_SHRINE_COLUMNS_PER_SIDE = LOW_PERFORMANCE_MODE ? 16 : 30;
+    const SIDE_SHRINE_TEXTURE_MAX_EDGE = LOW_PERFORMANCE_MODE ? 384 : 768;
+
     // ---------- Scene ----------
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x1b0803);
@@ -794,8 +841,9 @@
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
-    renderer.shadowMap.enabled = true;
+    const rendererPixelRatio = Math.min(window.devicePixelRatio || 1, RENDERER_PIXEL_RATIO_LIMIT);
+    renderer.setPixelRatio(rendererPixelRatio);
+    renderer.shadowMap.enabled = !LOW_PERFORMANCE_MODE;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -839,6 +887,9 @@
     const clock = new THREE.Clock();
     const keys = { w:false, a:false, s:false, d:false, up:false, down:false, left:false, right:false };
     const mobileMove = { forward:false, back:false, left:false, right:false };
+    const mobileMoveTab = document.getElementById('mobileMoveTab');
+    const mobileControlsPanel = document.getElementById('mobileControlsPanel');
+    const mobileControlClose = document.getElementById('mobileControlClose');
     const offeringPanel = document.getElementById('offeringPanel');
     const offeringMessage = document.getElementById('offeringMessage');
     const offeringStatus = document.getElementById('offeringStatus');
@@ -876,7 +927,7 @@
     const SHOW_VERTICAL_ZONE_DIVIDERS = false;
     const SHRINE_LAYOUT_TUNING = {
       rows: 3,
-      columnsPerSide: 30,
+      columnsPerSide: SIDE_SHRINE_COLUMNS_PER_SIDE,
       statueHeightRatio: 0.52,
       statueMaxWidthRatio: 0.58,
       statueForwardOffset: 0.18,
@@ -887,6 +938,7 @@
       cellPaddingX: 0.06,
       cellPaddingY: 0.08
     };
+    const PERFORMANCE_MODE_LABEL = LOW_PERFORMANCE_MODE ? 'Mobile low performance mode' : 'Desktop full mode';
     const SPONSOR_LABEL_STYLE = {
       text: "善信供養",
       widthScale: 0.82,
@@ -965,7 +1017,17 @@
       if (e.code === 'ArrowRight') keys.right = false;
     });
 
-    document.querySelectorAll('#mobilePad button[data-move]').forEach(btn => {
+    function setMobileControlsOpen(isOpen) {
+      mobileControlsPanel?.classList.toggle('mobile-controls-open', isOpen);
+      mobileMoveTab?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      if (!isOpen) Object.keys(mobileMove).forEach(k => mobileMove[k] = false);
+    }
+    mobileMoveTab?.addEventListener('click', () => {
+      setMobileControlsOpen(!mobileControlsPanel.classList.contains('mobile-controls-open'));
+    });
+    mobileControlClose?.addEventListener('click', () => setMobileControlsOpen(false));
+
+    document.querySelectorAll('#mobileControlsPanel button[data-move]').forEach(btn => {
       const move = btn.dataset.move;
       const set = (v) => {
         if (move === 'stop') {
@@ -1244,7 +1306,7 @@
     };
     Object.assign(DEITY_IMAGES, CANONICAL_DEITY_IMAGES);
 
-    const SHRINE_ZONES = {
+    const DESKTOP_SHRINE_ZONES = {
       left: [
         { deity: "藥師佛", cols: 6, title: "藥師佛區" },
         { deity: "阿彌陀佛", cols: 6, title: "阿彌陀佛區" },
@@ -1260,6 +1322,23 @@
         { deity: "黃財神", cols: 6, title: "黃財神區" }
       ]
     };
+    const MOBILE_SHRINE_ZONES = {
+      left: [
+        { deity: "藥師佛", cols: 3, title: "藥師佛區" },
+        { deity: "阿彌陀佛", cols: 3, title: "阿彌陀佛區" },
+        { deity: "蓮花生大士", cols: 3, title: "蓮師區" },
+        { deity: "文殊菩薩", cols: 3, title: "文殊區" },
+        { deity: "綠度母", cols: 4, title: "綠度母區" }
+      ],
+      right: [
+        { deity: "釋迦牟尼佛", cols: 3, title: "佛陀區" },
+        { deity: "金剛薩埵", cols: 3, title: "金剛薩埵區" },
+        { deity: "四臂觀音", cols: 3, title: "觀音區" },
+        { deity: "地藏王菩薩", cols: 3, title: "地藏區" },
+        { deity: "黃財神", cols: 4, title: "黃財神區" }
+      ]
+    };
+    const SHRINE_ZONES = LOW_PERFORMANCE_MODE ? MOBILE_SHRINE_ZONES : DESKTOP_SHRINE_ZONES;
 
     const OFFERING_IMAGES = {
       lamp: "assets/images/offerings/lamp.png",
@@ -1286,6 +1365,7 @@
     const persistentTextures = new Set();
     const deityTextureCache = new Map();
     const deityTexturePending = new Map();
+    const resizedDeityTextureCache = new Map();
     const offeringTextureCache = new Map();
     const offeringTexturePending = new Map();
     const symbolTextureCache = new Map();
@@ -1859,8 +1939,8 @@
       const deityText = deityReady === deityTotal ? `佛像圖片：${deityTotal} / ${deityTotal} 已載入` : `佛像圖片：${deityReady} / ${deityTotal}`;
       const offeringText = offeringReady === offeringTotal ? `供品圖片：${offeringTotal} / ${offeringTotal} 已載入` : `供品圖片：${offeringReady} / ${offeringTotal}`;
       const symbolText = symbolReady === symbolTotal ? `八吉祥：${symbolTotal} / ${symbolTotal} 已載入` : `八吉祥：${symbolReady} / ${symbolTotal}`;
-      deityImageStatusEl.innerHTML = `${deityText}<br/>${offeringText}<br/>${symbolText}<br/>左右佛龕：${totalShelfStatues} 尊`;
-      mainBuddhaStatusEl.innerHTML = `佛像來源：AI 生成高清透明 PNG<br/>主佛：${imageFileName(currentMainBuddhaImagePath)}<br/>左右佛龕：${totalShelfStatues} 尊，三排分區供奉`;
+      deityImageStatusEl.innerHTML = `${deityText}<br/>${offeringText}<br/>${symbolText}<br/>左右佛龕：${totalShelfStatues} 尊<br/>Performance mode: ${PERFORMANCE_MODE_LABEL}`;
+      mainBuddhaStatusEl.innerHTML = `佛像來源：AI 生成高清透明 PNG<br/>主佛：${imageFileName(currentMainBuddhaImagePath)}<br/>左右佛龕：${totalShelfStatues} 尊，三排分區供奉<br/>Performance mode: ${PERFORMANCE_MODE_LABEL}`;
 
       const missing = [
         ...[...deityImageStates.entries()].filter(([, state]) => state === 'missing').map(([path]) => path),
@@ -1925,13 +2005,45 @@
       });
     }
 
-    function requestDeityTexture(name, onLoad, onFail) {
+    function createResizedTexture(texture, path, maxLongEdge) {
+      const image = texture.image;
+      if (!image || !image.width || !image.height) return texture;
+      const longEdge = Math.max(image.width, image.height);
+      if (longEdge <= maxLongEdge) return texture;
+      const cacheKey = `${path}|${maxLongEdge}`;
+      const cached = resizedDeityTextureCache.get(cacheKey);
+      if (cached) return cached;
+
+      const scale = maxLongEdge / longEdge;
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+      const ctx = canvas.getContext('2d', { alpha: true });
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      const resized = new THREE.CanvasTexture(canvas);
+      resized.colorSpace = THREE.SRGBColorSpace;
+      resized.needsUpdate = true;
+      persistentTextures.add(resized);
+      resizedDeityTextureCache.set(cacheKey, resized);
+      return resized;
+    }
+
+    function requestDeityTexture(name, onLoad, onFail, options = {}) {
       const path = DEITY_IMAGES[name];
       if (!path) {
         onFail?.();
         return;
       }
-      requestImageTexture(path, deityTextureCache, deityTexturePending, deityImageStates, `佛像 ${name}`, onLoad, onFail);
+      requestImageTexture(path, deityTextureCache, deityTexturePending, deityImageStates, `佛像 ${name}`, (texture) => {
+        if (options.main) {
+          onLoad(texture);
+          return;
+        }
+        onLoad(createResizedTexture(texture, path, options.maxTextureEdge || SIDE_SHRINE_TEXTURE_MAX_EDGE));
+      }, onFail);
     }
 
     function createGoldSilhouetteFallback(name, options={}) {
@@ -2024,7 +2136,7 @@
         const material = new THREE.MeshBasicMaterial({
           map: texture,
           transparent: true,
-          alphaTest: 0.03,
+          alphaTest: main ? 0.03 : 0.08,
           side: THREE.DoubleSide,
           depthWrite: false,
           depthTest: true,
@@ -2048,7 +2160,7 @@
         attachPlane(texture);
       }, () => {
         holder.add(createGoldSilhouetteFallback(name, { main, height }));
-      });
+      }, { main, maxTextureEdge: SIDE_SHRINE_TEXTURE_MAX_EDGE });
 
       const label = main
         ? makeTextSprite(options.labelText || name, { scale: 1.38, fontSize: 74 })
@@ -2292,7 +2404,7 @@
     let currentMusicIndex = 0;
     let musicWasPlaying = false;
     const buddhaAudio = new Audio();
-    buddhaAudio.preload = 'metadata';
+    buddhaAudio.preload = LOW_PERFORMANCE_MODE ? 'none' : 'metadata';
     buddhaAudio.volume = Number(localStorage.getItem(MUSIC_STORAGE_KEYS.volume) || 0.18);
     buddhaAudio.muted = localStorage.getItem(MUSIC_STORAGE_KEYS.muted) === 'true';
 
@@ -2327,7 +2439,12 @@
       if (!musicManifest.length) return;
       currentMusicIndex = (index + musicManifest.length) % musicManifest.length;
       const current = musicManifest[currentMusicIndex];
-      buddhaAudio.src = current.file;
+      if (!LOW_PERFORMANCE_MODE || keepPlayback) {
+        buddhaAudio.src = current.file;
+      } else {
+        buddhaAudio.removeAttribute('src');
+        buddhaAudio.load();
+      }
       buddhaAudio.loop = musicLoop.checked;
       musicSelect.value = current.id;
       localStorage.setItem(MUSIC_STORAGE_KEYS.selected, current.id);
@@ -2343,7 +2460,8 @@
         return;
       }
       if (!buddhaAudio.src) {
-        loadMusicByIndex(currentMusicIndex, false);
+        const current = musicManifest[currentMusicIndex];
+        if (current) buddhaAudio.src = current.file;
       }
       try {
         await buddhaAudio.play();
@@ -3017,6 +3135,8 @@
         colStart += zone.cols;
       });
 
+      if (LOW_PERFORMANCE_MODE) return;
+
       for (let i = 0; i < 5; i++) {
         const z = zMin + stepZ * (i * 4 + 2);
         const localLight = new THREE.PointLight(0xffc875, 13, 7.6, 1.75);
@@ -3027,6 +3147,13 @@
     createShelves(-1);
     createShelves(1);
     refreshImageAssetStatus();
+    console.log("Performance mode", {
+      IS_MOBILE,
+      LOW_PERFORMANCE_MODE,
+      pixelRatio: rendererPixelRatio,
+      sideShrineCount: totalShelfStatues,
+      targetFPS: TARGET_FPS
+    });
     loadShrineOfferingData();
     console.info(`Created side shrine statues: ${totalShelfStatues}`);
 
@@ -3163,8 +3290,11 @@
     }
 
     // ---------- Animate ----------
-    function animate() {
+    let lastRenderTime = 0;
+    function animate(time = 0) {
       requestAnimationFrame(animate);
+      if (time - lastRenderTime < 1000 / TARGET_FPS) return;
+      lastRenderTime = time;
       const delta = Math.min(clock.getDelta(), 0.033);
       const t = clock.elapsedTime;
 
@@ -3187,6 +3317,7 @@
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(rendererPixelRatio);
     });
   </script>
 </body>

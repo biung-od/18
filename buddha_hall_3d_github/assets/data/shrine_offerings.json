@@ -186,10 +186,10 @@
     "col": 5,
     "zone": "藥師佛區",
     "deity": "藥師佛",
-    "sponsorName": "善信供養",
-    "wishText": null,
-    "startDate": null,
-    "endDate": null
+    "sponsorName": "楊東憲",
+    "wishText": "身體健康",
+    "startDate": "2026-04-29",
+    "endDate": "2026-12-31"
   },
   {
     "id": "left-zone-01-row-02-col-06",
@@ -1158,10 +1158,10 @@
     "col": 2,
     "zone": "佛陀區",
     "deity": "釋迦牟尼佛",
-    "sponsorName": "善信供養",
+    "sponsorName": "楊東憲",
     "wishText": null,
-    "startDate": null,
-    "endDate": null
+    "startDate": "2026-04-29",
+    "endDate": "2026-12-29"
   },
   {
     "id": "right-zone-01-row-02-col-03",

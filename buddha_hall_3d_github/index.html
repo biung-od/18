@@ -931,8 +931,8 @@
       statueHeightRatio: 0.52,
       statueMaxWidthRatio: 0.58,
       statueForwardOffset: 0.18,
-      labelScale: 0.54,
-      labelYOffset: -0.10,
+      labelScale: 1.12,
+      labelYOffset: -0.18,
       zoneTitleScale: 1.35,
       haloScale: 0.72,
       cellPaddingX: 0.06,
@@ -941,10 +941,10 @@
     const PERFORMANCE_MODE_LABEL = LOW_PERFORMANCE_MODE ? 'Mobile low performance mode' : 'Desktop full mode';
     const SPONSOR_LABEL_STYLE = {
       text: "善信供養",
-      widthScale: 0.82,
-      heightScale: 0.22,
-      fontSize: 60,
-      opacity: 0.76
+      widthScale: 0.96,
+      heightScale: 0.40,
+      fontSize: 132,
+      opacity: 0.62
     };
     const SPONSOR_STORAGE_KEY = "shrineOfferings";
     const SPONSOR_DATA_CHANNEL = "shrine-offerings-updates";
@@ -1174,7 +1174,7 @@
 
       const variant = options.variant || 'default';
       const rect = variant === 'sponsor'
-        ? { x: 220, y: 86, w: 584, h: 76, r: 24 }
+        ? { x: 112, y: 46, w: 800, h: 154, r: 38 }
         : (variant === 'zone'
           ? { x: 96, y: 56, w: 832, h: 126, r: 30 }
           : { x: 36, y: 56, w: 952, h: 128, r: 34 });
@@ -1201,13 +1201,19 @@
       ctx.lineWidth = variant === 'sponsor' ? 3 : 6;
       ctx.stroke();
 
-      ctx.font = `800 ${options.fontSize || 76}px "Noto Sans TC", "Microsoft JhengHei", sans-serif`;
+      let fontSize = options.fontSize || 76;
+      ctx.font = `800 ${fontSize}px "Noto Sans TC", "Microsoft JhengHei", sans-serif`;
+      const maxTextWidth = variant === 'sponsor' ? rect.w - 56 : rect.w - 70;
+      while (ctx.measureText(text).width > maxTextWidth && fontSize > 54) {
+        fontSize -= 4;
+        ctx.font = `800 ${fontSize}px "Noto Sans TC", "Microsoft JhengHei", sans-serif`;
+      }
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.shadowColor = variant === 'sponsor' ? 'rgba(80, 36, 6, 0.32)' : 'rgba(255, 187, 66, 0.68)';
       ctx.shadowBlur = variant === 'sponsor' ? 6 : 18;
       ctx.fillStyle = variant === 'zone' ? '#381804' : '#fff2bf';
-      ctx.fillText(text, 512, 122);
+      ctx.fillText(text, 512, variant === 'sponsor' ? 124 : 122);
 
       const texture = new THREE.CanvasTexture(canvas);
       texture.colorSpace = THREE.SRGBColorSpace;
@@ -1228,7 +1234,7 @@
       const fullText = String(text || SPONSOR_LABEL_STYLE.text).trim() || SPONSOR_LABEL_STYLE.text;
       const label = makeTextSprite(formatSponsorDisplayName(fullText), {
         scale: 1,
-        fontSize: options.fontSize || (fullText.length > SPONSOR_DISPLAY_MAX_CHARS ? 44 : SPONSOR_LABEL_STYLE.fontSize),
+        fontSize: options.fontSize || (fullText.length > SPONSOR_DISPLAY_MAX_CHARS ? 116 : SPONSOR_LABEL_STYLE.fontSize),
         variant: 'sponsor',
         widthScale: options.widthScale || SPONSOR_LABEL_STYLE.widthScale,
         heightScale: options.heightScale || SPONSOR_LABEL_STYLE.heightScale,
@@ -3095,9 +3101,11 @@
             scene.add(panel);
 
             const statueHeight = Math.min(cellHeight * SHRINE_LAYOUT_TUNING.statueHeightRatio, safeHeight);
-            const labelHeight = SPONSOR_LABEL_STYLE.heightScale;
-            const centerY = row.bottomY + labelHeight + 0.12 + statueHeight / 2;
-            const labelYOffset = -(statueHeight / 2 + labelHeight * 0.80 + 0.04);
+            const maxLabelWidth = cellWidth * 0.95;
+            const labelScale = Math.min(SHRINE_LAYOUT_TUNING.labelScale, maxLabelWidth / SPONSOR_LABEL_STYLE.widthScale);
+            const labelVisualHeight = SPONSOR_LABEL_STYLE.heightScale * labelScale;
+            const centerY = row.bottomY + labelVisualHeight + 0.12 + statueHeight / 2;
+            const labelYOffset = -(statueHeight / 2 + labelVisualHeight * 0.68 + 0.08);
             const id = makeOfferingId(sideName, zoneIndex, rowIndex, col);
             const offeringData = {
               id,
@@ -3122,7 +3130,7 @@
                 maxWidth: Math.min(safeWidth, cellWidth * SHRINE_LAYOUT_TUNING.statueMaxWidthRatio),
                 labelText: "善信供養",
                 offeringId: id,
-                labelScale: SHRINE_LAYOUT_TUNING.labelScale,
+                labelScale,
                 labelYOffset,
                 haloScale: SHRINE_LAYOUT_TUNING.haloScale
               }
